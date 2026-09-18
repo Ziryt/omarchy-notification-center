@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "id": "jankeesvw.notification-center",
+  "id": "ziryt.notification-center",
   "name": "Notification Center",
   "version": "1.1.0",
   "author": "Jankees van Woezik",
   "description": "Every notification you were sent, kept, and readable again",
-  "homepage": "https://github.com/jankeesvw/omarchy-notification-center",
+  "homepage": "https://github.com/ziryt/omarchy-notification-center",
   "license": "MIT",
   "kinds": [
     "service",

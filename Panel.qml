@@ -29,8 +29,8 @@ import "components"
 Panel {
   id: root
 
-  moduleName: "jankeesvw.notification-center"
-  ipcTarget: "jankeesvw.notification-center"
+  moduleName: "ziryt.notification-center"
+  ipcTarget: "ziryt.notification-center"
 
   readonly property string omarchyPath: Quickshell.env("OMARCHY_PATH")
 
@@ -85,7 +85,7 @@ Panel {
     }
     var host = bar && bar.shell ? bar.shell : null
     if (!host || typeof host.serviceFor !== "function") return
-    var s = host.serviceFor("jankeesvw.notification-center")
+    var s = host.serviceFor("ziryt.notification-center")
     if (!s) return
     store = s
     pushSettings()

@@ -188,7 +188,7 @@ Item {
   }
 
   IpcHandler {
-    target: "jankeesvw.notification-center.test"
+    target: "ziryt.notification-center.test"
 
     function seed(count: int): string {
       Quickshell.execDetached(root.storeCommand(["seed", String(count > 0 ? count : 25)]))
