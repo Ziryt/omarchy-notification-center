@@ -47,6 +47,7 @@ Panel {
   readonly property string clickAction: setting("clickAction", "Auto")
   readonly property bool showBody: setting("showBody", true)
   readonly property bool showPreview: setting("showPreview", true)
+  readonly property string panelPosition: setting("panelPosition", "Right")
 
   // ------------------------------------------------------------- the service
   //
@@ -327,9 +328,20 @@ Panel {
     }
   }
 
-  // Where the panel hangs from: a zero-width point far past the right edge of
-  // any screen. Invisible, in the layout for nothing, and read only for its
-  // position; see the anchor comment on the panel itself.
+  // Where a Left/Right panel hangs from: a zero-width point pushed far past
+  // that edge of any screen. Invisible, in the layout for nothing, and read
+  // only for its position; see the anchor comment on the panel itself.
+  // Children of `root` rather than of `button`, so each still lives in the
+  // same per-monitor window as the bell that owns it.
+  Item {
+    id: leftAnchor
+    anchors.top: button.top
+    anchors.bottom: button.bottom
+    x: -1000000
+    width: 1
+    visible: false
+  }
+
   Item {
     id: rightAnchor
     anchors.top: button.top
@@ -384,14 +396,17 @@ Panel {
 
   KeyboardPanel {
     id: popup
-    // Anchored to a point past the right edge of the screen rather than to the
-    // bell. KeyboardPanel clamps its card inside the screen, so an anchor out
-    // there always resolves to hard against the right edge, whatever the bar
-    // has been rearranged into since. This is the one panel in the bar with a
-    // fixed home: a notification center that opened in a different place
-    // depending on how many widgets were to its left would be a notification
-    // center you have to look for.
-    anchorItem: rightAnchor
+    // Left/Right hang from a point pushed past that edge of the screen.
+    // KeyboardPanel clamps its card inside the screen, so the point always
+    // resolves to flush against that edge, whatever the bar has been
+    // rearranged into since — a fixed home, the way the panel always worked
+    // before this setting existed. Center hands off to KeyboardPanel's own
+    // bar-centering instead of a synthetic point. Button drops the panel
+    // from the bell itself, so it moves if the bell does.
+    anchorItem: root.panelPosition === "Left" ? leftAnchor
+      : root.panelPosition === "Button" ? button
+      : rightAnchor
+    centerOnBar: root.panelPosition === "Center"
     bar: root.bar
     owner: root
     open: root.opened
