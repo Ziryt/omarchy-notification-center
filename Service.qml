@@ -2,6 +2,8 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
+import "StoreBridge.js" as StoreBridge
+
 // The archive, mounted once for the shell.
 //
 // Omarchy builds a bar per monitor. If the watcher and the in-memory list
@@ -14,6 +16,8 @@ Item {
   width: 0
   height: 0
   visible: false
+
+  Component.onDestruction: if (StoreBridge.get() === root) StoreBridge.register(null)
 
   property var shell: null
   property var manifest: null
@@ -183,6 +187,9 @@ Item {
   Process { id: markProc; environment: root.storeEnvironment }
 
   Component.onCompleted: {
+    // See StoreBridge.js: bar.shell.serviceFor() only resolves under the
+    // trusted first-party bar, so Panel.qml also checks here as a fallback.
+    StoreBridge.register(root)
     readSeen()
     load()
   }

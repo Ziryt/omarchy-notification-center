@@ -6,6 +6,7 @@ import qs.Commons
 import qs.Ui
 
 import "components"
+import "StoreBridge.js" as StoreBridge
 
 // A notification center for Omarchy: everything you were sent, still there
 // when you go back for it.
@@ -83,9 +84,15 @@ Panel {
       pushSettings()
       return
     }
+    // bar.shell.serviceFor() only resolves under the trusted, first-party
+    // bar: a replacement bar hosting this widget gets a narrower facade with
+    // no serviceFor at all, so it can't be handed another plugin's live
+    // service -- which also means it can't hand this plugin its own. See
+    // StoreBridge.js for the fallback Service.qml registers itself into.
     var host = bar && bar.shell ? bar.shell : null
-    if (!host || typeof host.serviceFor !== "function") return
-    var s = host.serviceFor("ziryt.notification-center")
+    var s = host && typeof host.serviceFor === "function"
+      ? host.serviceFor("ziryt.notification-center") : null
+    if (!s) s = StoreBridge.get()
     if (!s) return
     store = s
     pushSettings()

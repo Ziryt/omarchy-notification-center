@@ -475,11 +475,25 @@ cmd_list() {
   # filtered rather than deleted, so the cut has to happen before the limit:
   # take the newest N of what is still showing, not what is left of the newest
   # N after the cleared ones are dropped out of it.
+  #
+  # Once the archive holds more matching lines than $limit, `head` exits the
+  # moment it has its N lines, closing the pipe out from under the jq feeding
+  # it — which dies of SIGPIPE. Under the script-wide `pipefail`, that dead
+  # middle stage makes the whole pipeline report failure even though the
+  # final `jq -s` already wrote a complete, valid array, so the `||` fires
+  # too and appends a second, bogus `[]` after it. Two JSON values where a
+  # reader expects one breaks every caller's JSON.parse, permanently — this
+  # is the one pipeline in the file that is expected to truncate its input
+  # early, so it is the one that needs pipefail off.
+  set +o pipefail
   tac "$archive" 2>/dev/null |
     jq -Rc --argjson cleared "$cleared_at" \
       'fromjson? // empty | select((.timestamp // 0) > $cleared)' 2>/dev/null |
     head -n "$limit" |
-    jq -s '.' 2>/dev/null || printf '[]\n'
+    jq -s '.' 2>/dev/null
+  local status=$?
+  set -o pipefail
+  ((status == 0)) || printf '[]\n'
 }
 
 remove_key() {
